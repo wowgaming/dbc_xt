@@ -6,32 +6,58 @@ int main(int argc, char**argv) {
 	string filename,opt;
 
     if (argc<=1) {
-		opt = "import";
-		filename = "Spell";
+		cout << "Enter command: import/export\n";
+		cin >> opt;
+		cout << "Enter filename\n";
+		cin >> filename;
 		// return 0;
 	} else {
 		opt = argv[1];
 		filename = argv[2];
 	}
 
-    //This repeats the program. You close console window manually by clicking "x". 
-    system ("CLS"); //this will clear the screen of any text from prior run
-    cin.clear(); //this will clear any values remain in cin from prior run
-    string name;
+	if (opt == "export" && (filename == "" || filename == "*")){
+		MYSQL_ROW tables;
+		MYSQL_RES *result;
+		my_ulonglong nb_tables;
 
-    size_t found=filename.find(".");
-    //if (found!=string::npos) {
-        name = filename.substr(0,found);
-    //}
+		database *db = new database();
+		db->connect();
+		result=mysql_list_tables(db->getConnection(),NULL);
+		if (result==NULL)
+			printf("Error: no tables\n");
+		else {
+			nb_tables=result->row_count;
+		}
 
-    if (opt == "import") {
-        tosql *sql = new tosql(name);
-        sql->convert();
-    } else {
-        todbc *dbc = new todbc(name);
-        dbc->convert();
-    }
+		tables=mysql_fetch_row(result);
+		delete db;
+		for (unsigned int i=0;i<nb_tables;i++) {
+			todbc *dbc = new todbc(tables[i]);
+			dbc->convert();
+		}
+	} else {
+		vector<string> files = common::split(filename,",","",false);
 
-    system ("PAUSE");
-    return 1;
+		for (vector<string>::iterator it = files.begin(); it != files.end(); it++) {
+			string name;
+
+			size_t found=it->find(".");
+			//if (found!=string::npos) {
+				name = it->substr(0,found);
+			//}
+
+			if (opt == "import") {
+				tosql *sql = new tosql(name);
+				sql->convert();
+			} else {
+				todbc *dbc = new todbc(name);
+				dbc->convert();
+			}
+		}
+	}
+
+	cout << "Process completed .. press any key to quit";
+	_getch();
+	exit(1);
 }

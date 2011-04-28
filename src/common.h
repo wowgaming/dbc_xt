@@ -27,27 +27,6 @@ class common
 				//size_t sFind=0,sSkip=0,eSkip=string::npos,eFind=string::npos
 				size_t skip = 0;
 				while (true) {		
-					/* uncompleted algorithm 
-					std::string substr;
-					eFind = s.find(delim,sFind);
-					if (eFind !=string::npos) {
-						substr = s.substr(sFind+1,eFind-1);
-						sSkip = substr.find(skipEChar);
-						if (sSkip !=string::npos) {
-							eSkip = s.find(skipEChar,eFind);
-							if (eSkip !=string::npos)
-								result.push_back(s.substr(sSkip,eSkip));
-
-							sFind = sFind+1+eSkip+1;
-						} else if (keep_empty || !substr.empty()) {
-							result.push_back(substr);
-							sFind = eFind+1;
-						}
-					} else {
-						result.push_back(s.substr(sFind,eFind));
-						break;
-					}*/
-
 					// skip process ( to fix)
 					string temp2(substart,s.end());
 					if (temp2.substr(0,1) == skipEChar) {

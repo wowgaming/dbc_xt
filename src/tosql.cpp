@@ -26,11 +26,13 @@ bool tosql::convert() {
     db->connect();
 
     // drop the table
+	std::cout << "Creating table: " << fName << "\n";
     std::string drop = "DROP TABLE  IF EXISTS `"+fName+"`; \n";
     createSql(drop);
 
     // create the table
     createTable();
+	std::cout << "Creating data..\n";
     // fill with data
     createData();
 
@@ -91,14 +93,17 @@ string tosql::createTable() {
 string tosql::createData() {
     std::string createStr,row;
 
-    csvInput.seekg (0,ios::beg);
     getline(csvInput,row); //go to the second line - hack 
 
     int rCount = 0,insCount = 0;
 	createStr = "INSERT INTO `"+fName+"` VALUES \n";
 
+	std::cout << "Processed lines:\n";
     while(getline(csvInput,row)) // To get you all the lines.
     {
+		if (rCount % 1000 == 0) // jump to speedup
+			std::cout << rCount << "\r" << std::flush;
+
 		if (row.size() > 0 ) {
 			if (sqlCInsRange > 0 && sqlCInsRange == insCount) {
 				createStr += ";\n";
@@ -122,6 +127,8 @@ string tosql::createData() {
 		//if (rCount>100)
 		//	break;
     }
+
+	std::cout << "\n";
 
 	createStr += ";\n";
 	createSql(createStr);

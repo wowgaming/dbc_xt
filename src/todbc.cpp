@@ -18,6 +18,12 @@ bool todbc::convert() {
 	vector<string> ftype;
 
 	fields = CIniFile::GetValue(fName,"files",INI_FIELDS_FORMAT);
+	if (fields.empty()) {
+		cout << "missing fields file";
+		return false;
+	}
+
+
 	ftype = common::split(fields,",","",false);
     csvOutput << fields+",\n";
 
@@ -31,10 +37,18 @@ bool todbc::convert() {
     MYSQL_RES *res = db->getResult();
     if (!res) // can't happen
         return false;
-
-	uint count = mysql_num_fields(res);
+	my_ulonglong rCount = res->row_count;
+	unsigned int fCount = mysql_num_fields(res);
+	int r=0,perc=0;
+	std::cout << "Processing: " << fName << "\n";
+	std::cout << "Loading:\n";
     while ((row = mysql_fetch_row(res)) != NULL) {
-        for (uint i=0; i < count; i++)
+		r++;
+		perc=(r*100)/rCount;
+		if (perc % 10 == 0) // skip at each 5 units, to speed up the cycle 
+			std::cout << perc << "%\r" << std::flush;
+
+        for (uint i=0; i < fCount; i++)
         {
 			
 			rs = "";
@@ -55,6 +69,8 @@ bool todbc::convert() {
         }
         csvOutput << "\n";
     }
+
+	std::cout << "\n";
     
     //close
     db->disconnect();
